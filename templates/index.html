@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAAS Sales Outreach Chatbox</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .chatbox {
+            width: 400px;
+            background: rgb(255, 138, 106);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .chatbox-header {
+            background: #000000;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        .chatbox-body {
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+        }
+        .chatbox-footer {
+            display: flex;
+            padding: 10px;
+            background: #f4f4f4;
+        }
+        .chatbox-footer input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .chatbox-footer button {
+            padding: 10px;
+            background: #000000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-left: 10px;
+        }
+        .message {
+            margin: 10px 0;
+        }
+        .message.user {
+            text-align: right;
+        }
+        .message.bot {
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbox">
+        <div class="chatbox-header">
+            SAAS Sales Outreach Chatbox
+        </div>
+        <div class="chatbox-body" id="chatbox-body">
+            <div class="message bot">Hi there! My name is Diego, a system created by Ariz to provide the best SAAS sales outreach dates and times within the coming week. Would you like this information? (yes/no)</div>
+        </div>
+        <div class="chatbox-footer">
+            <input type="text" id="user-input" placeholder="Type your message here...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const userInput = document.getElementById('user-input').value;
+            if (userInput.trim() === '') return;
+
+            const chatboxBody = document.getElementById('chatbox-body');
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.textContent = userInput;
+            chatboxBody.appendChild(userMessage);
+
+            fetch('/get_best_times', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ user_input: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(message => {
+                    const botMessage = document.createElement('div');
+                    botMessage.className = 'message bot';
+                    botMessage.textContent = message;
+                    chatboxBody.appendChild(botMessage);
+                });
+                chatboxBody.scrollTop = chatboxBody.scrollHeight;
+            });
+
+            document.getElementById('user-input').value = '';
+        }
+    </script>
+</body>
+</html>

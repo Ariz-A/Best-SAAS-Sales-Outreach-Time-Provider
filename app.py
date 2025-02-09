@@ -1,4 +1,7 @@
+from flask import Flask, request, jsonify, render_template
 import datetime
+
+app = Flask(__name__)
 
 def suggest_best_times_for_two_weeks():
     # Get the current date and time
@@ -21,15 +24,25 @@ def suggest_best_times_for_two_weeks():
 
     return suggested_times
 
-if __name__ == '__main__':
-    user_input = input("Hi there! My name is Diego, a system created by Ariz to provide the best SAAS sales outreach dates and times within the coming week. Would you like this information? (yes/no): ").strip().lower()
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/get_best_times', methods=['POST'])
+def get_best_times():
+    user_input = request.json.get('user_input').strip().lower()
     if user_input == 'yes':
         best_times = suggest_best_times_for_two_weeks()
+        response = []
         for time in best_times[:15]:  # Provide only the first 15 suggested times
             time_str = time.strftime('%A, %Y-%m-%d %H:%M:%S')
             if time.strftime('%H:%M:%S') == '12:00:00':
-                print(f"Suggested time for email outreach: {time_str} (Note: People may be having lunch around this time)")
+                response.append(f"Suggested time for email outreach: {time_str} (Note: People may be having lunch around this time)")
             else:
-                print(f"Suggested time for email outreach: {time_str}")
+                response.append(f"Suggested time for email outreach: {time_str}")
+        return jsonify(response)
     else:
-        print("No worries, have a good rest of your day!")
+        return jsonify(["No worries, have a good rest of your day!"])
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)  # Change the port number here
